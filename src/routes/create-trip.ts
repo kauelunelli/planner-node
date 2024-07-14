@@ -7,6 +7,11 @@ import getMailClient from "../lib/mail";
 import { dayjs } from "../lib/dayjs";
 import { ClientError } from "../errors/client-error";
 import { env } from "../env";
+// const userId = getUserId(request);
+
+
+
+const userId = "clyky0j840000l9z251v54x8z";
 
 export async function createTrip(app: FastifyInstance) {
 	app.withTypeProvider<ZodTypeProvider>().post(
@@ -39,8 +44,17 @@ export async function createTrip(app: FastifyInstance) {
 				throw new ClientError("Start date should be in the future");
 			}
 
+			const userExists = await prisma.user.findFirst({
+				where: { id: userId },
+			})
+
+			if (!userExists) {
+				throw new ClientError("User does not exist");
+			}
+
 			const trip = await prisma.trip.create({
 				data: {
+					userId: userId,
 					destination,
 					starts_at,
 					ends_at,

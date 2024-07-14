@@ -29,7 +29,7 @@ export default async function confirmParticipant(app: FastifyInstance) {
 			}
 
 			if (participant.is_confirmed) {
-				return reply.redirect(`${env.WEB_BASE_URL}/trips/${participant.id}`);
+				return reply.redirect(`${env.WEB_BASE_URL}/trips/${participant.trip_id}`);
 			}
 
 			await prisma.participant.update({
