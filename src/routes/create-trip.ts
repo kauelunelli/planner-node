@@ -7,34 +7,33 @@ import getMailClient from "../lib/mail";
 import { dayjs } from "../lib/dayjs";
 import { ClientError } from "../errors/client-error";
 import { env } from "../env";
+import { authenticate } from '../controllers/auth';
 // const userId = getUserId(request);
 
 
 
-const userId = "clyky0j840000l9z251v54x8z";
 
 export async function createTrip(app: FastifyInstance) {
 	app.withTypeProvider<ZodTypeProvider>().post(
 		"/trips",
 		{
+			preHandler: [authenticate],
 			schema: {
 				body: z.object({
 					destination: z.string().min(4),
 					starts_at: z.coerce.date(),
 					ends_at: z.coerce.date(),
-					owner_name: z.string(),
-					owner_email: z.string().email(),
 					emails_to_invite: z.array(z.string().email()).optional(),
 				}),
 			},
 		},
+
 		async (request) => {
+			const userId = (request as any).userId;
 			const {
 				destination,
 				starts_at,
 				ends_at,
-				owner_name,
-				owner_email,
 				emails_to_invite,
 			} = request.body;
 			if (dayjs(starts_at).isAfter(ends_at)) {
@@ -44,11 +43,16 @@ export async function createTrip(app: FastifyInstance) {
 				throw new ClientError("Start date should be in the future");
 			}
 
-			const userExists = await prisma.user.findFirst({
-				where: { id: userId },
-			})
+			if (!userId) {
+				throw new ClientError("User not logged in");
+			}
 
-			if (!userExists) {
+			const user = await prisma.user.findFirst({
+				where: { id: userId },
+				select: { name: true, email: true },
+			});
+
+			if (!user) {
 				throw new ClientError("User does not exist");
 			}
 
@@ -62,8 +66,8 @@ export async function createTrip(app: FastifyInstance) {
 						createMany: {
 							data: [
 								{
-									name: owner_name,
-									email: owner_email,
+									name: user.name,
+									email: user.email,
 									is_owner: true,
 									is_confirmed: true,
 								},
@@ -83,7 +87,6 @@ export async function createTrip(app: FastifyInstance) {
 			const formattedEndsAt = dayjs(ends_at).format("LL");
 
 			const confirmationLink = `${env.API_BASE_URL}/trips/${trip.id}/confirm`;
-
 			const mail = await getMailClient();
 			const message = await mail.sendMail({
 				from: {
@@ -91,8 +94,8 @@ export async function createTrip(app: FastifyInstance) {
 					address: "oi@planner",
 				},
 				to: {
-					name: request.body.owner_name,
-					address: request.body.owner_email,
+					name: user.name,
+					address: user.email,
 				},
 				subject: "Viagem criada com sucesso",
 				html: `
@@ -143,7 +146,7 @@ export async function createTrip(app: FastifyInstance) {
   </head>
   <body>
     <div class="email-container">
-      <h1>Olá! ${owner_name}</h1>
+      <h1>Olá! ${user.name}</h1>
       <p>Você solicitou a criação de uma viagem para <strong> ${destination} </strong> nas datas <string>${formattedStartsAt} até ${formattedEndsAt}</string>.</p>
       <p></p>
       <p>Para confirmar sua viagem, clique no botão abaixo:!</p>

@@ -39,7 +39,7 @@ export default async function confirmTrip(app: FastifyInstance) {
 			}
 
 			if (trip.is_confirmed) {
-				return reply.redirect(`${env.API_BASE_URL}/trips/${trip.id}`);
+				return reply.redirect(`${env.WEB_BASE_URL}/trips/${trip.id}`);
 			}
 
 			await prisma.trip.update({
