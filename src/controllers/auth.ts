@@ -71,6 +71,21 @@ export async function login(app: FastifyInstance) {
   );
 }
 
+export async function logout(app: FastifyInstance) {
+  app.withTypeProvider<ZodTypeProvider>().post(
+    "/logout",
+    {
+      preHandler: [authenticate],
+    },
+    async (request) => {
+
+      request.userSession.delete('userId');
+      return { message: 'User logged out' };
+    }
+  );
+
+}
+
 export async function authenticate(request: FastifyRequest, reply: FastifyReply) {
   try {
     const token = request.headers.authorization?.split(' ')[1] // Extrai o token do cabeçalho Authorization
