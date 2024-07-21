@@ -19,6 +19,8 @@ import { createUser, login } from "./controllers/auth";
 import fastifySecureSession from "@fastify/secure-session";
 import fs from "fs";
 import path from "path";
+import { getTrips } from "./routes/get-trips";
+import { removeTrip } from "./routes/remove-trip";
 
 
 // Register the plugin
@@ -50,11 +52,14 @@ app.register(getLinks)
 app.register(getParticipants)
 app.register(getTripDetails)
 app.register(getParticipant)
+app.register(getTrips)
 
 app.register(confirmTrip)
 app.register(confirmParticipant)
 
 app.register(updateTrip)
+
+app.register(removeTrip)
 
 
 
