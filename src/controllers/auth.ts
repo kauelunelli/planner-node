@@ -7,6 +7,7 @@ import { ZodTypeProvider } from "fastify-type-provider-zod";
 import { z } from "zod";
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 
+
 export async function createUser(app: FastifyInstance) {
   app.withTypeProvider<ZodTypeProvider>().post(
     "/singup",
@@ -52,7 +53,7 @@ export async function login(app: FastifyInstance) {
         }),
       },
     },
-    async (request) => {
+    async (request, reply) => {
       const { email, password } = request.body;
 
       const user = await prisma.user.findFirst({ where: { email } });
@@ -64,9 +65,9 @@ export async function login(app: FastifyInstance) {
         throw new ClientError("Invalid password");
       }
 
-      // Store the user information in the session or any other storage mechanism
-      request.userSession.set('userId', user);
-      return { user, token: jwt.sign({ userId: user.id }, env.JWT_SECRET) };
+      const token = jwt.sign({ userId: user.id }, env.JWT_SECRET);
+
+      return { user, token };
     }
   );
 }
@@ -77,9 +78,7 @@ export async function logout(app: FastifyInstance) {
     {
       preHandler: [authenticate],
     },
-    async (request) => {
-
-      request.userSession.delete('userId');
+    async () => {
       return { message: 'User logged out' };
     }
   );
@@ -93,7 +92,6 @@ export async function authenticate(request: FastifyRequest, reply: FastifyReply)
     if (!token) {
       return reply.status(401).send({ error: 'Token não fornecido' });
     }
-
     const decoded = jwt.verify(token, env.JWT_SECRET);
     (request as any).userId = decoded.userId;
   } catch (error) {
