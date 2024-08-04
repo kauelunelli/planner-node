@@ -33,7 +33,7 @@ export async function getLinks(app: FastifyInstance) {
 
 
 
-      return { linklist: trip.links };
+      return trip.links.map(link => ({ id: link.id, title: link.title, url: link.url }));
     }
   );
 }

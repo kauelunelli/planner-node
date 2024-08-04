@@ -23,6 +23,7 @@ export async function getParticipant(app: FastifyInstance) {
           name: true,
           email: true,
           is_confirmed: true,
+          is_owner: true
         },
         where: {
           id: participantId,
