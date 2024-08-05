@@ -5,7 +5,8 @@ import * as jwt from 'jsonwebtoken';
 import { env } from "../env";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
 import { z } from "zod";
-import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
+import { FastifyInstance } from 'fastify';
+import { authenticate } from '../middleware/authenticate';
 
 
 export async function createUser(app: FastifyInstance) {
@@ -84,17 +85,3 @@ export async function logout(app: FastifyInstance) {
   );
 
 }
-
-export async function authenticate(request: FastifyRequest, reply: FastifyReply) {
-  try {
-    const token = request.headers.authorization?.split(' ')[1] // Extrai o token do cabeçalho Authorization
-    console.log(token)
-    if (!token) {
-      return reply.status(401).send({ error: 'Token não fornecido' });
-    }
-    const decoded = jwt.verify(token, env.JWT_SECRET);
-    (request as any).userId = decoded.userId;
-  } catch (error) {
-    return reply.status(403).send({ error: 'Token inválido ou expirado' });
-  }
-};

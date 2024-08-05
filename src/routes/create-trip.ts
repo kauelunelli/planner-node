@@ -7,7 +7,7 @@ import getMailClient from "../lib/mail";
 import { dayjs } from "../lib/dayjs";
 import { ClientError } from "../errors/client-error";
 import { env } from "../env";
-import { authenticate } from '../controllers/auth';
+import { authenticate } from "../middleware/authenticate";
 // const userId = getUserId(request);
 
 
