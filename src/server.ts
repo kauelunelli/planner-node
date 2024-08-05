@@ -18,51 +18,53 @@ import { env } from "./env";
 import { createUser, login } from "./controllers/auth";
 import { getTrips } from "./routes/get-trips";
 import { removeTrip } from "./routes/remove-trip";
+import { removeLink } from "./routes/remove-link";
 
+// Função para criar o servidor Fastify
+export function createServer() {
+  const app = fastify();
 
-// Register the plugin
+  app.register(cors, {
+    origin: '*',
+  });
 
-const app = fastify();
+  app.setValidatorCompiler(validatorCompiler);
+  app.setSerializerCompiler(serializerCompiler);
 
-app.register(cors, {
-  origin: '*',
-});
+  app.setErrorHandler(errorHandler);
+  app.register(createLink);
+  app.register(createActivity);
+  app.register(createTrip);
+  app.register(createInvite);
+  app.register(createUser);
+  app.register(login);
 
+  app.register(getActivity);
+  app.register(getLinks);
+  app.register(getParticipants);
+  app.register(getTripDetails);
+  app.register(getParticipant);
+  app.register(getTrips);
 
+  app.register(confirmTrip);
+  app.register(confirmParticipant);
 
+  app.register(updateTrip);
 
+  app.register(removeLink);
+  app.register(removeTrip);
 
-app.setValidatorCompiler(validatorCompiler);
-app.setSerializerCompiler(serializerCompiler);
+  return app;
+}
 
-app.setErrorHandler(errorHandler)
-app.register(createLink)
-app.register(createActivity)
-app.register(createTrip)
-app.register(createInvite)
-app.register(createUser)
-app.register(login)
-
-app.register(getActivity)
-app.register(getLinks)
-app.register(getParticipants)
-app.register(getTripDetails)
-app.register(getParticipant)
-app.register(getTrips)
-
-app.register(confirmTrip)
-app.register(confirmParticipant)
-
-app.register(updateTrip)
-
-app.register(removeTrip)
-
-
-
-app.listen({ port: env.PORT }, (err, address) => {
-  if (err) {
-    console.error(err);
-    process.exit(1);
-  }
-  console.log(`Server listening at ${address}`);
-});
+// Iniciar o servidor em produção
+if (require.main === module) {
+  const app = createServer();
+  app.listen({ port: env.PORT }, (err, address) => {
+    if (err) {
+      console.error(err);
+      process.exit(1);
+    }
+    console.log(`Server listening at ${address}`);
+  });
+}
