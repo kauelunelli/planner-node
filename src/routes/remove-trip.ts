@@ -9,7 +9,7 @@ export async function removeTrip(app: FastifyInstance) {
   app.withTypeProvider<ZodTypeProvider>().delete(
     "/trips/:tripId/remove",
     {
-      // preHandler: [authenticate],
+      preHandler: [authenticate],
       schema: {
         params: z.object({
           tripId: z.string().cuid(),
@@ -20,8 +20,8 @@ export async function removeTrip(app: FastifyInstance) {
       const userId = (request as any).userId;
       const { tripId } = request.params;
 
-
       const trip = await prisma.trip.findUnique({
+
         where: {
           id: tripId,
         },
@@ -29,6 +29,10 @@ export async function removeTrip(app: FastifyInstance) {
 
       if (!trip) {
         throw new ClientError("Trip not found");
+      }
+
+      if (trip.userId !== userId) {
+        throw new ClientError("You are not the owner of this trip");
       }
 
       await prisma.$transaction([
