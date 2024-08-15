@@ -19,6 +19,8 @@ import { createUser, login } from "./controllers/auth";
 import { getTrips } from "./routes/get-trips";
 import { removeTrip } from "./routes/remove-trip";
 import { removeLink } from "./routes/remove-link";
+import { removeParticipant } from "./routes/remove-participant";
+import { createParticipant } from "./routes/create-participant";
 
 // Função para criar o servidor Fastify
 export function createServer() {
@@ -38,6 +40,7 @@ export function createServer() {
   app.register(createInvite);
   app.register(createUser);
   app.register(login);
+  app.register(createParticipant)
 
   app.register(getActivity);
   app.register(getLinks);
@@ -51,6 +54,7 @@ export function createServer() {
 
   app.register(updateTrip);
 
+  app.register(removeParticipant);
   app.register(removeLink);
   app.register(removeTrip);
 
