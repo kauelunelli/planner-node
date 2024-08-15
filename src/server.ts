@@ -21,6 +21,7 @@ import { removeTrip } from "./routes/remove-trip";
 import { removeLink } from "./routes/remove-link";
 import { removeParticipant } from "./routes/remove-participant";
 import { createParticipant } from "./routes/create-participant";
+import authenticateRoute from "./middleware/authenticate";
 
 // Função para criar o servidor Fastify
 export function createServer() {
@@ -32,6 +33,7 @@ export function createServer() {
 
   app.setValidatorCompiler(validatorCompiler);
   app.setSerializerCompiler(serializerCompiler);
+  app.register(authenticateRoute)
 
   app.setErrorHandler(errorHandler);
   app.register(createLink);
@@ -53,6 +55,7 @@ export function createServer() {
   app.register(confirmParticipant);
 
   app.register(updateTrip);
+
 
   app.register(removeParticipant);
   app.register(removeLink);
