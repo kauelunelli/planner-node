@@ -64,17 +64,15 @@ export async function createParticipant(app: FastifyInstance) {
       const formattedEndsAt = dayjs(trip.ends_at).format("LL");
       const mailClient = await getMailClient();
 
-      await Promise.all(
-        trip.participants.map(async (participant) => {
-          const confirmationLink = `${env.API_BASE_URL}/participants/${participant.id}/confirm`;
-          const message = await mailClient.sendMail({
-            from: {
-              name: "Equipe plann.er",
-              address: "oi@planner",
-            },
-            to: participant.email,
-            subject: `Confirme sua presença na viagem para ${trip.destination} em ${formattedStartsAt}`,
-            html: `
+      const confirmationLink = `${env.API_BASE_URL}/participants/${participant.id}/confirm`;
+      const message = await mailClient.sendMail({
+        from: {
+          name: "Equipe plann.er",
+          address: "oi@planner",
+        },
+        to: participant.email,
+        subject: `Confirme sua presença na viagem para ${trip.destination} em ${formattedStartsAt}`,
+        html: `
 			
 				<head>
 					<style>
@@ -131,11 +129,9 @@ export async function createParticipant(app: FastifyInstance) {
 				</body>
 			
 			`.trim(),
-          });
-          console.log(nodemailer.getTestMessageUrl(message));
-          return reply.redirect(`${env.WEB_BASE_URL}/trips/${tripId}`);
-        })
-      );
-    }
-  )
+      });
+      console.log(nodemailer.getTestMessageUrl(message));
+      return reply.redirect(`${env.WEB_BASE_URL}/trips/${tripId}`);
+    })
+
 };
