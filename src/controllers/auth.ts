@@ -76,12 +76,24 @@ export async function login(app: FastifyInstance) {
 export async function logout(app: FastifyInstance) {
   app.withTypeProvider<ZodTypeProvider>().post(
     "/logout",
-    {
-      preHandler: [authenticate],
-    },
     async () => {
       return { message: 'User logged out' };
     }
   );
 
+}
+
+export async function authenticateUser(app: FastifyInstance) {
+  app.withTypeProvider<ZodTypeProvider>().get(
+    "/authenticate",
+    {
+      preHandler: [authenticate],
+    },
+    async (request) => {
+      return {
+        authenticated: true,
+        userId: (request as any).userId,
+      };
+    }
+  );
 }
